@@ -6,7 +6,7 @@ I came across a ttyrec file, a recorded NetHack-game in a text file. NetHack (fo
 ![](images/NethackScreenshot.gif)
 [Image Source: Wikipedia](https://commons.wikimedia.org/wiki/File:NethackScreenshot.gif)
 
-Some people record their games and share their games using this ttyrec-file format. The file contains the movements of a player move by move. I wanted to make an animated gif from that. Such a gif that it ends with the image of a grave and I can build it from a command line of Raspberry Pi to a specific length of time. First I need to parse the ttyrec-file into a editable form. Re-playing the ttyrec-file with PHP is a simple piece of code, but parsing is another thing.
+Some people record their games and share their games using this ttyrec-file format. The file contains the movements of a player, move by move. I wanted to make an animated gif from that; such a gif that it ends with the image of a grave and I can build it from a command line of Raspberry Pi to a specific length of time. First, I need to parse the ttyrec-file into a editable form. Re-playing the ttyrec-file with PHP is a simple piece of code, but parsing is another issue.
 ```
 $contents = file_get_contents("nethack.ttyrec");
 $prev = null;
@@ -26,20 +26,20 @@ while(strlen($contents) > 0) {
     $contents = substr($contents, 12 + $len); // ready for next round
 }
 ```
-I wanted to find a screen which has "Killed by" text and drop rest of the screens with a piece of code. So time to do some coding. First I need to extract the screens from the file and interpret the commands to a printable format.
+I wanted to find a screen that has "Killed by" text and drop the rest of the screens with a piece of code. So time to do some coding. First I need to extract the screens from the file and interpret the commands to a printable format.
 
-Ttyrec-file is a text file that starts with the \[seconds from 1970-01-01 00:00:00\]/\[microseconds\]/\[length of content\] and then content of a screen, followed by a same kind of block of the next screen. The content is filled with vt100-commands that are used to move cursor and print characters in a terminal. They are identified by an ESC-character and then a command which tells the terminal what to do. For example ```ESC[30m``` tells terminal to turn foreground color to white and ```ESC[2;24H``` command tells the terminal to move cursor to row 2 column 24. Everything else is outputted to terminal.
+Ttyrec-file is a text file that starts with the \[seconds from 1970-01-01 00:00:00\]/\[microseconds\]/\[length of content\] and then content of a screen, followed by a same kind of block of the next screen. The content is filled with vt100-commands that are used to move the cursor and print characters in a terminal. They are identified by an ESC-character and then a command which tells the terminal what to do. For example, ```ESC[30m``` tells terminal to turn the foreground colour to white and the ```ESC[2;24H``` command tells the terminal to move cursor to row 2 column 24. Everything else is output to the terminal.
 
 ## The parser structure
 
-First I load the ttyrec-file into a class called Terminal. Then I separate the screens from the input and then interpret the strings into commands. The commands may or may not have a printable output. Output is a string which contains ascii characters which shape the dungeon, monsters and items shown in the first image. I also added commands for backspace, newline and carriage return for easier interpretting later with a simple str_replace. The phases (1) and (2) in below picture.
+First, I load the ttyrec-file into a class called Terminal. Then I separate the screens from the input and then interpret the strings into commands. The commands may or may not have a printable output. Output is a string which contains ascii characters which shape the dungeon, monsters and items shown in the first image. I also added commands for backspace, newline and carriage return for easier interpretting later with a simple str_replace. Phases (1) and (2) are in the below picture.
 
 ![](images/structure.jpg)
 
 
 # Interpretting the commands to present the actual terminal
 
-The screens follow each other, so from previous screen there might be characters left to the next screen. if I want to know what is printed in screen 401, I need to go through all the screens from 1 to 400 in case they leave any output to be printed in screen 401. All the commands have an output, which is the actual printable string. For some commands I added different variables to describe the command better. For example MoveArrowCommand has booleans up, down, left and right to determine which way to move the cursor. CursorMoveCommand has variables row and col to tell where to move the cursor before output. Interpretting commands to actual output is just looping the commands of a screen. At the end we "print out" the output with parseOutputToTerminal-function.
+The screens follow each other, so from the previous screen there may be characters left to the next screen. If I want to know what is printed in screen 401, I need to go through all the screens from 1 to 400 in case they leave any output to be printed in screen 401. All the commands have an output, which is the actual printable string. For some commands, I added different variables to better describe the command. For example, MoveArrowCommand has booleans up, down, left and right, to determine which way to move the cursor. CursorMoveCommand has variables row and col to tell where to move the cursor before output. Interpretting commands to actual output is just looping the commands of a screen. At the end we "print out" the output with parseOutputToTerminal-function.
 
 (The (3) path in the above picture) We get the screen, loop the commands of the screen and output strings to build the actual console state. The functions which interprets the commands looks like this.
 ```
@@ -71,7 +71,7 @@ foreach ($screens as $screen) {
         ...
 ```
 
-After this looping we have an array that is filled with rows that have an output. We set this ready array back to screen object so we can access the state of screen later. Then we can just output them into anything. Like to a text file.
+After this looping, we have an array that is filled with rows that have an output. We set this ready array back to screen object so we can later access the state of screen. Then we can just output them into anything, like to a text file.
 
 ```
 // get screen 401
@@ -108,7 +108,7 @@ imagegif($im, $filename);
 ```
 ![](images/terminal.png)
 
-Nice. After doing this for all the screens, I have 6415 individual gif files. Now we come to next problem. How do I combine them into a single animated gif?
+Nice. After doing this for all of the screens, I have 6415 individual gif files. Now we come to the next problem. How do I combine them into a single animated gif?
 
 [Part 2: Making an animated gif with PHP](BLOG_part2.md)
 
@@ -119,7 +119,7 @@ Nice. After doing this for all the screens, I have 6415 individual gif files. No
 --- 
 
 ![](images/herbie.png)
-Duukkis has been building the Internet for 20 years in multiple various size projects. He is a coder and maker of things. He has done over 70 Twitter-bots, a noun- and verb- conjugator with PHP and a portrait from 7366 pieces of Lego. He is a developer, architect and a nice guy.
+Duukkis has been building the Internet for 20 years in multiple various size projects. He is a coder and maker of things. He has done over 70 Twitter-bots, a noun- and verb- conjugator with PHP, and a portrait from 7366 pieces of Lego. He is a developer, architect and a nice guy.
 
 
 
